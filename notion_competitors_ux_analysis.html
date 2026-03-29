@@ -1,0 +1,639 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.page { padding: 1.5rem 0; }
+.tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tab { padding: 7px 16px; font-size: 13px; font-weight: 500; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); cursor: pointer; background: var(--color-background-secondary); color: var(--color-text-secondary); transition: all .15s; }
+.tab.active, .tab:hover { background: var(--color-background-primary); color: var(--color-text-primary); border-color: var(--color-border-primary); }
+.tab.active { font-weight: 500; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* Tool header row */
+.tool-grid { display: grid; grid-template-columns: 180px repeat(4, 1fr); gap: 0; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+.th-cell { padding: 14px 12px; background: var(--color-background-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+.th-cell:not(:last-child) { border-right: 0.5px solid var(--color-border-tertiary); }
+.tool-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.tool-sub { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+.row { display: contents; }
+.cell { padding: 13px 12px; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; color: var(--color-text-primary); line-height: 1.5; vertical-align: top; }
+.cell:not(:last-child) { border-right: 0.5px solid var(--color-border-tertiary); }
+.cell.label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); background: var(--color-background-secondary); }
+.row:last-child .cell { border-bottom: none; }
+
+/* Score pills */
+.score { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-size: 12px; font-weight: 500; margin-bottom: 4px; }
+.s-green { background: var(--color-background-success); color: var(--color-text-success); }
+.s-amber { background: var(--color-background-warning); color: var(--color-text-warning); }
+.s-red { background: var(--color-background-danger); color: var(--color-text-danger); }
+.s-blue { background: var(--color-background-info); color: var(--color-text-info); }
+
+/* Tags */
+.tag { display: inline-block; padding: 2px 8px; border-radius: var(--border-radius-md); font-size: 11px; font-weight: 500; margin: 2px 2px 2px 0; }
+.tag-pro { background: var(--color-background-success); color: var(--color-text-success); }
+.tag-con { background: var(--color-background-danger); color: var(--color-text-danger); }
+.tag-neutral { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+
+/* Overview cards */
+.overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+.card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.badge { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+.badge-notion { background: var(--color-background-secondary); color: var(--color-text-primary); border: 0.5px solid var(--color-border-secondary); }
+.badge-clickup { background: #EAD9FE; color: #533B9E; }
+.badge-confluence { background: #D6E8FF; color: #0552B5; }
+.badge-coda { background: #D9F2EC; color: #076558; }
+.card-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.card-type { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
+.stat-row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+.stat-label { font-size: 11px; color: var(--color-text-secondary); }
+.stat-val { font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+.bar-bg { height: 4px; background: var(--color-background-secondary); border-radius: 2px; margin-top: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 2px; transition: width .4s ease; }
+
+/* Hierarchy diagram */
+.hier { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.h-col { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+.h-header { padding: 10px 12px; font-size: 13px; font-weight: 500; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.h-header-notion { background: var(--color-background-secondary); color: var(--color-text-primary); }
+.h-header-clickup { background: #EAD9FE; color: #533B9E; }
+.h-header-confluence { background: #D6E8FF; color: #0552B5; }
+.h-header-coda { background: #D9F2EC; color: #076558; }
+.h-level { padding: 8px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 12px; display: flex; align-items: flex-start; gap: 6px; }
+.h-level:last-child { border-bottom: none; }
+.h-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.h-label { font-weight: 500; color: var(--color-text-primary); font-size: 12px; }
+.h-desc { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
+.indent-1 { padding-left: 20px; }
+.indent-2 { padding-left: 32px; }
+
+/* Heuristic bar chart */
+.heur-grid { display: grid; grid-template-columns: 160px 1fr; gap: 0; row-gap: 10px; align-items: center; }
+.heur-label { font-size: 12px; color: var(--color-text-secondary); }
+.heur-bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.heur-bar-wrap { display: flex; flex-direction: column; gap: 2px; }
+.heur-bar-bg { height: 18px; border-radius: 3px; background: var(--color-background-secondary); overflow: hidden; }
+.heur-bar-fill { height: 100%; border-radius: 3px; display: flex; align-items: center; padding-left: 4px; font-size: 10px; font-weight: 500; }
+.heur-tool { font-size: 10px; color: var(--color-text-secondary); text-align: center; }
+.legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 1rem; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+/* Tone & voice table */
+.tv-table { width: 100%; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; border-collapse: separate; border-spacing: 0; }
+.tv-table th { padding: 10px 12px; background: var(--color-background-secondary); font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-align: left; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.tv-table th:not(:last-child), .tv-table td:not(:last-child) { border-right: 0.5px solid var(--color-border-tertiary); }
+.tv-table td { padding: 10px 12px; font-size: 12px; color: var(--color-text-primary); border-bottom: 0.5px solid var(--color-border-tertiary); vertical-align: top; line-height: 1.5; }
+.tv-table tr:last-child td { border-bottom: none; }
+
+/* Onboarding timeline */
+.ob-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.ob-col { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+.ob-hdr { padding: 10px 12px; font-size: 12px; font-weight: 500; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.ob-step { padding: 8px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 11px; color: var(--color-text-primary); display: flex; gap: 6px; line-height: 1.5; }
+.ob-step:last-child { border-bottom: none; }
+.ob-num { font-size: 10px; font-weight: 500; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+/* UX insight pill */
+.insight { padding: 8px 12px; border-radius: var(--border-radius-md); font-size: 12px; line-height: 1.5; margin-bottom: 6px; }
+.insight-win { background: var(--color-background-success); color: var(--color-text-success); border: 0.5px solid var(--color-border-success); }
+.insight-fail { background: var(--color-background-danger); color: var(--color-text-danger); border: 0.5px solid var(--color-border-danger); }
+.insight-label { font-weight: 500; margin-right: 4px; }
+.section-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 10px; margin-top: 1rem; }
+.section-title:first-child { margin-top: 0; }
+</style>
+
+<div class="page">
+  <div class="tabs">
+    <div class="tab active" onclick="show('overview')">Overview</div>
+    <div class="tab" onclick="show('hierarchy')">Info hierarchy</div>
+    <div class="tab" onclick="show('heuristics')">Heuristic compliance</div>
+    <div class="tab" onclick="show('ux-writing')">UX writing</div>
+    <div class="tab" onclick="show('onboarding')">Onboarding</div>
+    <div class="tab" onclick="show('insights')">UX insights</div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div id="overview" class="panel active">
+    <p class="section-title">Notion vs its 3 biggest competitors by user base</p>
+    <div class="overview-grid">
+      <div class="card">
+        <div class="card-top">
+          <div class="badge badge-notion">N</div>
+          <div><div class="card-name">Notion</div><div class="card-type">All-in-one workspace</div></div>
+        </div>
+        <div class="stat-row"><span class="stat-label">Users</span><span class="stat-val">~35M+</span></div>
+        <div class="bar-bg"><div class="bar-fill" style="width:88%;background:#888780"></div></div>
+        <div class="stat-row" style="margin-top:8px"><span class="stat-label">G2 rating</span><span class="stat-val">4.7 / 5</span></div>
+        <div class="stat-row"><span class="stat-label">Founded</span><span class="stat-val">2016</span></div>
+      </div>
+      <div class="card" style="border: 2px solid #C4B1F0;">
+        <div class="card-top">
+          <div class="badge badge-clickup">CU</div>
+          <div><div class="card-name">ClickUp</div><div class="card-type">Project mgmt + workspace</div></div>
+        </div>
+        <div class="stat-row"><span class="stat-label">Users</span><span class="stat-val">10M+</span></div>
+        <div class="bar-bg"><div class="bar-fill" style="width:72%;background:#7F77DD"></div></div>
+        <div class="stat-row" style="margin-top:8px"><span class="stat-label">G2 rating</span><span class="stat-val">4.6 / 5</span></div>
+        <div class="stat-row"><span class="stat-label">Revenue (2024)</span><span class="stat-val">$278.5M</span></div>
+      </div>
+      <div class="card" style="border: 2px solid #A8C8F0;">
+        <div class="card-top">
+          <div class="badge badge-confluence">CF</div>
+          <div><div class="card-name">Confluence</div><div class="card-type">Team wiki + documentation</div></div>
+        </div>
+        <div class="stat-row"><span class="stat-label">Organizations</span><span class="stat-val">40,000+</span></div>
+        <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#378ADD"></div></div>
+        <div class="stat-row" style="margin-top:8px"><span class="stat-label">G2 rating</span><span class="stat-val">4.1 / 5</span></div>
+        <div class="stat-row"><span class="stat-label">Pages created (2022)</span><span class="stat-val">58M+</span></div>
+      </div>
+      <div class="card" style="border: 2px solid #9FE1CB;">
+        <div class="card-top">
+          <div class="badge badge-coda">CO</div>
+          <div><div class="card-name">Coda</div><div class="card-type">Doc-as-app workspace</div></div>
+        </div>
+        <div class="stat-row"><span class="stat-label">Teams</span><span class="stat-val">50,000+</span></div>
+        <div class="bar-bg"><div class="bar-fill" style="width:30%;background:#1D9E75"></div></div>
+        <div class="stat-row" style="margin-top:8px"><span class="stat-label">G2 rating</span><span class="stat-val">4.7 / 5</span></div>
+        <div class="stat-row"><span class="stat-label">Founded</span><span class="stat-val">2014</span></div>
+      </div>
+    </div>
+
+    <p class="section-title">Pros & cons at a glance</p>
+    <div class="tool-grid">
+      <div class="th-cell">Dimension</div>
+      <div class="th-cell">Notion</div>
+      <div class="th-cell">ClickUp</div>
+      <div class="th-cell">Confluence</div>
+      <div class="th-cell">Coda</div>
+
+      <div class="row">
+        <div class="cell label">Core strength</div>
+        <div class="cell">Flexible all-in-one workspace with block-based editing</div>
+        <div class="cell">Feature-rich project management + task hierarchy</div>
+        <div class="cell">Enterprise team wiki tightly integrated with Jira</div>
+        <div class="cell">Highly programmable "doc as app" with formulas</div>
+      </div>
+      <div class="row">
+        <div class="cell label">Primary audience</div>
+        <div class="cell">Individuals, startups, creative teams</div>
+        <div class="cell">Ops teams, project managers, cross-functional teams</div>
+        <div class="cell">Enterprise dev & IT, Atlassian ecosystem users</div>
+        <div class="cell">Power users, ops teams, tech-savvy builders</div>
+      </div>
+      <div class="row">
+        <div class="cell label">Top UX pros</div>
+        <div class="cell">
+          <span class="tag tag-pro">Clean blank-canvas UI</span>
+          <span class="tag tag-pro">Fast block editing</span>
+          <span class="tag tag-pro">Elegant templates</span>
+        </div>
+        <div class="cell">
+          <span class="tag tag-pro">Multiple views</span>
+          <span class="tag tag-pro">Deep task mgmt</span>
+          <span class="tag tag-pro">Rich automations</span>
+        </div>
+        <div class="cell">
+          <span class="tag tag-pro">Jira integration</span>
+          <span class="tag tag-pro">Scalable wikis</span>
+          <span class="tag tag-pro">Enterprise security</span>
+        </div>
+        <div class="cell">
+          <span class="tag tag-pro">Powerful tables</span>
+          <span class="tag tag-pro">Formula engine</span>
+          <span class="tag tag-pro">Custom automations</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="cell label">Top UX cons</div>
+        <div class="cell">
+          <span class="tag tag-con">Blank-canvas paralysis</span>
+          <span class="tag tag-con">Slow on large DBs</span>
+          <span class="tag tag-con">Weak task mgmt</span>
+        </div>
+        <div class="cell">
+          <span class="tag tag-con">Cluttered dense UI</span>
+          <span class="tag tag-con">Steep learning curve</span>
+          <span class="tag tag-con">Slow & buggy mobile</span>
+        </div>
+        <div class="cell">
+          <span class="tag tag-con">Dated interface</span>
+          <span class="tag tag-con">Complex permissions</span>
+          <span class="tag tag-con">Poor search relevance</span>
+        </div>
+        <div class="cell">
+          <span class="tag tag-con">Complex onboarding</span>
+          <span class="tag tag-con">Laggy large docs</span>
+          <span class="tag tag-con">Expensive at scale</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="cell label">Offline support</div>
+        <div class="cell">Limited</div>
+        <div class="cell">Limited</div>
+        <div class="cell">None</div>
+        <div class="cell">None</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO HIERARCHY -->
+  <div id="hierarchy" class="panel">
+    <p class="section-title">Information hierarchy — how each tool structures content</p>
+    <div class="hier">
+      <div class="h-col">
+        <div class="h-header h-header-notion">Notion</div>
+        <div class="h-level"><div class="h-dot" style="background:#888780"></div><div><div class="h-label">Workspace</div><div class="h-desc">Top-level account</div></div></div>
+        <div class="h-level indent-1"><div class="h-dot" style="background:#888780"></div><div><div class="h-label">Pages</div><div class="h-desc">Any content block</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#B4B2A9"></div><div><div class="h-label">Sub-pages</div><div class="h-desc">Nested, unlimited depth</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#B4B2A9"></div><div><div class="h-label">Databases</div><div class="h-desc">Tables, boards, calendars</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#B4B2A9"></div><div><div class="h-label">Blocks</div><div class="h-desc">Fundamental unit — text, media, embeds</div></div></div>
+        <div class="h-level"><div class="h-dot" style="background:#5F5E5A"></div><div><div class="h-label">Sidebar</div><div class="h-desc">Manual tree nav — no enforced structure</div></div></div>
+      </div>
+      <div class="h-col">
+        <div class="h-header h-header-clickup">ClickUp</div>
+        <div class="h-level"><div class="h-dot" style="background:#7F77DD"></div><div><div class="h-label">Workspace</div><div class="h-desc">Org-level container</div></div></div>
+        <div class="h-level indent-1"><div class="h-dot" style="background:#7F77DD"></div><div><div class="h-label">Spaces</div><div class="h-desc">Team or dept areas</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#AFA9EC"></div><div><div class="h-label">Folders</div><div class="h-desc">Project groupings</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#AFA9EC"></div><div><div class="h-label">Lists</div><div class="h-desc">Task containers</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#CECBF6"></div><div><div class="h-label">Tasks</div><div class="h-desc">Core work unit</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#CECBF6"></div><div><div class="h-label">Subtasks / Docs</div><div class="h-desc">Nested tasks, linked docs</div></div></div>
+        <div class="h-level"><div class="h-dot" style="background:#534AB7"></div><div><div class="h-label">Views</div><div class="h-desc">List, board, Gantt, calendar, timeline</div></div></div>
+      </div>
+      <div class="h-col">
+        <div class="h-header h-header-confluence">Confluence</div>
+        <div class="h-level"><div class="h-dot" style="background:#378ADD"></div><div><div class="h-label">Site</div><div class="h-desc">Org-level instance</div></div></div>
+        <div class="h-level indent-1"><div class="h-dot" style="background:#378ADD"></div><div><div class="h-label">Spaces</div><div class="h-desc">Team or project area</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#85B7EB"></div><div><div class="h-label">Pages</div><div class="h-desc">Wiki-style documents</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#85B7EB"></div><div><div class="h-label">Child pages</div><div class="h-desc">Hierarchical nesting</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#B5D4F4"></div><div><div class="h-label">Blog posts</div><div class="h-desc">Time-stamped updates</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#B5D4F4"></div><div><div class="h-label">Attachments</div><div class="h-desc">Files pinned to pages</div></div></div>
+        <div class="h-level"><div class="h-dot" style="background:#185FA5"></div><div><div class="h-label">Macros</div><div class="h-desc">Dynamic content blocks — tables of contents, charts</div></div></div>
+      </div>
+      <div class="h-col">
+        <div class="h-header h-header-coda">Coda</div>
+        <div class="h-level"><div class="h-dot" style="background:#1D9E75"></div><div><div class="h-label">Workspace</div><div class="h-desc">Account-level container</div></div></div>
+        <div class="h-level indent-1"><div class="h-dot" style="background:#1D9E75"></div><div><div class="h-label">Docs</div><div class="h-desc">Top-level files (app-like)</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#5DCAA5"></div><div><div class="h-label">Pages</div><div class="h-desc">Sections within a doc</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#5DCAA5"></div><div><div class="h-label">Sub-pages</div><div class="h-desc">Nested sections</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#9FE1CB"></div><div><div class="h-label">Tables</div><div class="h-desc">Relational data with formulas</div></div></div>
+        <div class="h-level indent-2"><div class="h-dot" style="background:#9FE1CB"></div><div><div class="h-label">Blocks</div><div class="h-desc">Text, buttons, charts, controls</div></div></div>
+        <div class="h-level"><div class="h-dot" style="background:#0F6E56"></div><div><div class="h-label">Packs (integrations)</div><div class="h-desc">Live data connections within docs</div></div></div>
+      </div>
+    </div>
+
+    <p class="section-title" style="margin-top:1.5rem">Key structural differences</p>
+    <div class="tool-grid">
+      <div class="th-cell">Aspect</div>
+      <div class="th-cell">Notion</div>
+      <div class="th-cell">ClickUp</div>
+      <div class="th-cell">Confluence</div>
+      <div class="th-cell">Coda</div>
+      <div class="row">
+        <div class="cell label">Nav model</div>
+        <div class="cell">Freeform sidebar tree</div>
+        <div class="cell">Enforced 5-level hierarchy</div>
+        <div class="cell">Space → page tree</div>
+        <div class="cell">Doc-centric, flat nav</div>
+      </div>
+      <div class="row">
+        <div class="cell label">Primary unit</div>
+        <div class="cell">Block (everything is a block)</div>
+        <div class="cell">Task</div>
+        <div class="cell">Page / Space</div>
+        <div class="cell">Doc / Table</div>
+      </div>
+      <div class="row">
+        <div class="cell label">Nesting depth</div>
+        <div class="cell">Unlimited sub-pages</div>
+        <div class="cell">Fixed 5 levels</div>
+        <div class="cell">Deep page hierarchy</div>
+        <div class="cell">Pages within docs, moderate</div>
+      </div>
+      <div class="row">
+        <div class="cell label">Data + docs together</div>
+        <div class="cell">Yes — databases inline</div>
+        <div class="cell">Partial — tasks + basic docs</div>
+        <div class="cell">Minimal — docs only</div>
+        <div class="cell">Deep — tables as first-class</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEURISTICS -->
+  <div id="heuristics" class="panel">
+    <p class="section-title">Nielsen's 10 heuristics — compliance ratings (1–5)</p>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-dot" style="background:#888780"></div>Notion</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7F77DD"></div>ClickUp</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#378ADD"></div>Confluence</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Coda</div>
+    </div>
+    <div id="heur-chart"></div>
+
+    <p class="section-title" style="margin-top:1.5rem">Notable heuristic failures reported by users</p>
+    <div class="tool-grid">
+      <div class="th-cell">Heuristic</div>
+      <div class="th-cell">Notion</div>
+      <div class="th-cell">ClickUp</div>
+      <div class="th-cell">Confluence</div>
+      <div class="th-cell">Coda</div>
+      <div class="row">
+        <div class="cell label">Visibility of system status</div>
+        <div class="cell">Good — autosave indicator present</div>
+        <div class="cell">Poor — automation delays with no feedback</div>
+        <div class="cell">Moderate — versioning visible, but notifications noisy</div>
+        <div class="cell">Good — live sync visible</div>
+      </div>
+      <div class="row">
+        <div class="cell label">Match between system & real world</div>
+        <div class="cell">Good — familiar doc metaphors</div>
+        <div class="cell">Poor — 5-tier hierarchy feels bureaucratic</div>
+        <div class="cell">Poor — "Spaces/Macros" unfamiliar to new users</div>
+        <div class="cell">Moderate — "Packs" and formulas are technical</div>
+      </div>
+      <div class="row">
+        <div class="cell label">User control & freedom</div>
+        <div class="cell">Excellent — undo, flexible blocks</div>
+        <div class="cell">Moderate — layout options limited</div>
+        <div class="cell">Moderate — permission complexity restricts freedom</div>
+        <div class="cell">Good — highly customizable</div>
+      </div>
+      <div class="row">
+        <div class="cell label">Consistency & standards</div>
+        <div class="cell">Good — consistent slash command system</div>
+        <div class="cell">Poor — UI inconsistency across features</div>
+        <div class="cell">Moderate — editor inconsistency vs older pages</div>
+        <div class="cell">Good — consistent building block model</div>
+      </div>
+      <div class="row">
+        <div class="cell label">Error prevention</div>
+        <div class="cell">Moderate — easy to create disorganized content</div>
+        <div class="cell">Moderate — complex automations can fail silently</div>
+        <div class="cell">Poor — permission misconfiguration risks</div>
+        <div class="cell">Moderate — formula errors need debugging</div>
+      </div>
+      <div class="row">
+        <div class="cell label">Flexibility & efficiency of use</div>
+        <div class="cell">Good — keyboard shortcuts, slash commands</div>
+        <div class="cell">Good — multiple views and customization</div>
+        <div class="cell">Moderate — macros powerful but complex</div>
+        <div class="cell">Excellent — formula engine + automations</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UX WRITING -->
+  <div id="ux-writing" class="panel">
+    <p class="section-title">UX writing taxonomy — tone, voice & content orientation</p>
+    <table class="tv-table">
+      <tr>
+        <th style="width:160px">Dimension</th>
+        <th>Notion</th>
+        <th>ClickUp</th>
+        <th>Confluence</th>
+        <th>Coda</th>
+      </tr>
+      <tr>
+        <td style="font-weight:500;color:var(--color-text-secondary)">Overall tone</td>
+        <td>Calm, aspirational, minimal. Encourages creativity without prescribing it.</td>
+        <td>Energetic, productivity-focused, slightly assertive. "Get it done" register.</td>
+        <td>Professional, neutral, enterprise-grade. Safe and formal for large orgs.</td>
+        <td>Warm, clever, builder-friendly. Celebrates power-user confidence.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:500;color:var(--color-text-secondary)">Voice</td>
+        <td>First-person plural ("We built this for you"). Quiet confidence.</td>
+        <td>Bold, direct imperative ("Do more. Ship faster."). Chest-thumping.</td>
+        <td>Third-person, documentation-like. Avoids personality.</td>
+        <td>Conversational and technical. Treats user as a fellow builder.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:500;color:var(--color-text-secondary)">Empty state copy</td>
+        <td>Inspirational — "A fresh page for your ideas." Minimal friction.</td>
+        <td>Instructional — "Create your first task." Directive.</td>
+        <td>Utilitarian — "Create a page to get started." Dry.</td>
+        <td>Inviting — "Build something here." Builder metaphor.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:500;color:var(--color-text-secondary)">Error messages</td>
+        <td>Friendly, non-technical. Rarely explains the cause.</td>
+        <td>Generic and vague. Fails to guide recovery effectively.</td>
+        <td>Technical, Atlassian-style stack detail. Too verbose for most users.</td>
+        <td>Moderate — formula errors clear to developers, opaque to others.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:500;color:var(--color-text-secondary)">CTA language</td>
+        <td>Soft — "Get started", "New page". Low pressure.</td>
+        <td>Active — "Add Task", "Create Space". High momentum.</td>
+        <td>Neutral — "Create", "Edit". Minimal energy.</td>
+        <td>Empowering — "New doc", "Build a table". Action-first.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:500;color:var(--color-text-secondary)">Content orientation</td>
+        <td>Knowledge + creation hybrid. Docs and tasks coexist as peers.</td>
+        <td>Task-first. Docs and wikis are secondary citizens.</td>
+        <td>Documentation-first. Tasks and project mgmt are external (Jira).</td>
+        <td>Data + docs hybrid. Tables elevated above text editing.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:500;color:var(--color-text-secondary)">Terminology clarity</td>
+        <td>Moderate — "database", "block", "template" familiar. "Relation" less so.</td>
+        <td>Low — "Spaces", "Lists", "Whiteboards", "ClickApps" all need orientation.</td>
+        <td>Low — "Spaces", "Macros", "Blueprints" confuse new users frequently.</td>
+        <td>Moderate — "Packs", "Canvas", "Formula" clear to power users only.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:500;color:var(--color-text-secondary)">Guidance style</td>
+        <td>Template gallery + community. Light-touch in-product hints.</td>
+        <td>Tooltips, checklist onboarding. Aggressive in-product prompts.</td>
+        <td>Help docs heavy. In-product guidance minimal. Relies on training.</td>
+        <td>Gallery, YouTube, community-driven. Richer than average but out-of-product.</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ONBOARDING -->
+  <div id="onboarding" class="panel">
+    <p class="section-title">Onboarding touchpoints — new user journey</p>
+    <div class="ob-grid">
+      <div class="ob-col">
+        <div class="ob-hdr" style="background:#F1EFE8;color:#444441;border-color:var(--color-border-tertiary)">Notion</div>
+        <div class="ob-step"><div class="ob-num" style="background:#D3D1C7;color:#444441">1</div><div>Sign-up with email or Google — single screen</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#D3D1C7;color:#444441">2</div><div>Role-selection prompt ("I'm using Notion for...")</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#D3D1C7;color:#444441">3</div><div>Pre-built workspace template based on use case</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#D3D1C7;color:#444441">4</div><div>Inline tooltip hints on first interaction with blocks</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#D3D1C7;color:#444441">5</div><div>Template gallery accessible from sidebar at any time</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#D3D1C7;color:#444441">6</div><div>No mandatory tutorial — freedom to explore</div></div>
+        <div class="ob-step" style="background:var(--color-background-success)"><div class="ob-num" style="background:#C0DD97;color:#3B6D11">✓</div><div style="color:var(--color-text-success);font-weight:500">Win: Low friction first session. Blank canvas activates quickly.</div></div>
+        <div class="ob-step" style="background:var(--color-background-danger)"><div class="ob-num" style="background:#F7C1C1;color:#A32D2D">✗</div><div style="color:var(--color-text-danger);font-weight:500">Gap: No clear guidance on database vs page — causes confusion.</div></div>
+      </div>
+      <div class="ob-col">
+        <div class="ob-hdr" style="background:#EAD9FE;color:#533B9E;border-color:#C4B1F0">ClickUp</div>
+        <div class="ob-step"><div class="ob-num" style="background:#CECBF6;color:#533B9E">1</div><div>Account creation → workspace name</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#CECBF6;color:#533B9E">2</div><div>Use-case selection → auto-generates Spaces/Lists</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#CECBF6;color:#533B9E">3</div><div>Onboarding checklist sidebar appears immediately</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#CECBF6;color:#533B9E">4</div><div>Email sequence begins in parallel ("start your journey")</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#CECBF6;color:#533B9E">5</div><div>Interactive walkthrough of core features</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#CECBF6;color:#533B9E">6</div><div>Help center chatbot available throughout</div></div>
+        <div class="ob-step" style="background:var(--color-background-success)"><div class="ob-num" style="background:#C0DD97;color:#3B6D11">✓</div><div style="color:var(--color-text-success);font-weight:500">Win: Checklist reduces blank-page anxiety for new users.</div></div>
+        <div class="ob-step" style="background:var(--color-background-danger)"><div class="ob-num" style="background:#F7C1C1;color:#A32D2D">✗</div><div style="color:var(--color-text-danger);font-weight:500">Gap: Overwhelming density on first screen — too many features visible immediately.</div></div>
+      </div>
+      <div class="ob-col">
+        <div class="ob-hdr" style="background:#D6E8FF;color:#0552B5;border-color:#A8C8F0">Confluence</div>
+        <div class="ob-step"><div class="ob-num" style="background:#B5D4F4;color:#185FA5">1</div><div>Usually provisioned by an admin — user receives invite</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#B5D4F4;color:#185FA5">2</div><div>Welcome screen (can be skipped by admins)</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#B5D4F4;color:#185FA5">3</div><div>Space selection or landing on a predefined Home space</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#B5D4F4;color:#185FA5">4</div><div>No in-product tutorial by default — relies on admin-created guides</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#B5D4F4;color:#185FA5">5</div><div>Template chooser on new page creation</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#B5D4F4;color:#185FA5">6</div><div>Atlassian University / external training often required</div></div>
+        <div class="ob-step" style="background:var(--color-background-success)"><div class="ob-num" style="background:#C0DD97;color:#3B6D11">✓</div><div style="color:var(--color-text-success);font-weight:500">Win: Template library is comprehensive for enterprise use cases.</div></div>
+        <div class="ob-step" style="background:var(--color-background-danger)"><div class="ob-num" style="background:#F7C1C1;color:#A32D2D">✗</div><div style="color:var(--color-text-danger);font-weight:500">Gap: New users dropped into complex environment with minimal guidance — steep drop-off.</div></div>
+      </div>
+      <div class="ob-col">
+        <div class="ob-hdr" style="background:#D9F2EC;color:#076558;border-color:#9FE1CB">Coda</div>
+        <div class="ob-step"><div class="ob-num" style="background:#9FE1CB;color:#076558">1</div><div>Sign-up → use-case survey (adjusts onboarding path)</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#9FE1CB;color:#076558">2</div><div>Task list presented based on survey responses</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#9FE1CB;color:#076558">3</div><div>Doc Gallery showcased — community templates visible early</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#9FE1CB;color:#076558">4</div><div>First doc opened has guided steps inline</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#9FE1CB;color:#076558">5</div><div>YouTube channel and Help Center linked prominently</div></div>
+        <div class="ob-step"><div class="ob-num" style="background:#9FE1CB;color:#076558">6</div><div>Community forums active — peer learning model</div></div>
+        <div class="ob-step" style="background:var(--color-background-success)"><div class="ob-num" style="background:#C0DD97;color:#3B6D11">✓</div><div style="color:var(--color-text-success);font-weight:500">Win: Survey-adaptive task list is clever UX — personalised from moment one.</div></div>
+        <div class="ob-step" style="background:var(--color-background-danger)"><div class="ob-num" style="background:#F7C1C1;color:#A32D2D">✗</div><div style="color:var(--color-text-danger);font-weight:500">Gap: 2-week learning curve reported — power requires upfront investment.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UX INSIGHTS -->
+  <div id="insights" class="panel">
+    <p class="section-title">UX wins — successful design decisions</p>
+    <div class="tool-grid" style="margin-bottom:1rem">
+      <div class="th-cell">Product</div>
+      <div class="th-cell" colspan="4">Notable UX wins</div>
+    </div>
+    <div style="display:grid;grid-template-columns:180px 1fr;gap:0;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden">
+      <div style="padding:14px 12px;border-bottom:0.5px solid var(--color-border-tertiary);border-right:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:13px;font-weight:500;color:var(--color-text-primary)">Notion</div>
+      <div style="padding:14px 12px;border-bottom:0.5px solid var(--color-border-tertiary)">
+        <div class="insight insight-win"><span class="insight-label">Slash command:</span> "/" anywhere opens block picker — reduces discoverability friction without toolbars</div>
+        <div class="insight insight-win"><span class="insight-label">Inline database:</span> Embed a database inside a page — collapses the gap between docs and data</div>
+        <div class="insight insight-win"><span class="insight-label">Template gallery:</span> Community-driven gallery shortens time-to-value for new users significantly</div>
+      </div>
+      <div style="padding:14px 12px;border-bottom:0.5px solid var(--color-border-tertiary);border-right:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:13px;font-weight:500;color:#533B9E">ClickUp</div>
+      <div style="padding:14px 12px;border-bottom:0.5px solid var(--color-border-tertiary)">
+        <div class="insight insight-win"><span class="insight-label">Onboarding checklist:</span> Progress sidebar reduces blank-screen paralysis for new users</div>
+        <div class="insight insight-win"><span class="insight-label">Multiple views:</span> Toggle between list, board, calendar, Gantt on the same data — no context switching</div>
+        <div class="insight insight-win"><span class="insight-label">Automations:</span> Trigger/action builder is the most comprehensive in this class</div>
+      </div>
+      <div style="padding:14px 12px;border-bottom:0.5px solid var(--color-border-tertiary);border-right:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:13px;font-weight:500;color:#185FA5">Confluence</div>
+      <div style="padding:14px 12px;border-bottom:0.5px solid var(--color-border-tertiary)">
+        <div class="insight insight-win"><span class="insight-label">Jira link:</span> Bidirectional sync between docs and tickets is uniquely valuable for dev teams</div>
+        <div class="insight insight-win"><span class="insight-label">Inline comments:</span> Highlight text → leave a comment — reduces review friction significantly</div>
+        <div class="insight insight-win"><span class="insight-label">Page analytics:</span> View count and engagement metrics help teams identify stale docs</div>
+      </div>
+      <div style="padding:14px 12px;border-right:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:13px;font-weight:500;color:#076558">Coda</div>
+      <div style="padding:14px 12px">
+        <div class="insight insight-win"><span class="insight-label">Survey-adaptive onboarding:</span> Use-case survey shapes the first experience — higher relevance from step one</div>
+        <div class="insight insight-win"><span class="insight-label">Doc Gallery:</span> One of the richest template communities — peer learning accelerates adoption</div>
+        <div class="insight insight-win"><span class="insight-label">Formula engine:</span> Spreadsheet-grade formulas in a document context — powerful for ops teams</div>
+      </div>
+    </div>
+
+    <p class="section-title" style="margin-top:1.5rem">UX challenges reported across the internet</p>
+    <div style="display:grid;grid-template-columns:180px 1fr;gap:0;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden">
+      <div style="padding:14px 12px;border-bottom:0.5px solid var(--color-border-tertiary);border-right:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:13px;font-weight:500;color:var(--color-text-primary)">Notion</div>
+      <div style="padding:14px 12px;border-bottom:0.5px solid var(--color-border-tertiary)">
+        <div class="insight insight-fail"><span class="insight-label">Blank canvas paralysis:</span> New users don't know where to start — too much freedom without structure</div>
+        <div class="insight insight-fail"><span class="insight-label">Database performance:</span> Large databases with many views slow significantly on web</div>
+        <div class="insight insight-fail"><span class="insight-label">Mobile degraded:</span> Mobile editing experience significantly worse than desktop</div>
+      </div>
+      <div style="padding:14px 12px;border-bottom:0.5px solid var(--color-border-tertiary);border-right:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:13px;font-weight:500;color:#533B9E">ClickUp</div>
+      <div style="padding:14px 12px;border-bottom:0.5px solid var(--color-border-tertiary)">
+        <div class="insight insight-fail"><span class="insight-label">UI density overload:</span> 1,100+ G2 mentions of non-intuitive UI; small fonts, competing visual hierarchy</div>
+        <div class="insight insight-fail"><span class="insight-label">Automation lag:</span> Automations can delay minutes — no clear status feedback during the wait</div>
+        <div class="insight insight-fail"><span class="insight-label">Dashboard overload:</span> Default view presents too many simultaneous widgets; no progressive disclosure</div>
+      </div>
+      <div style="padding:14px 12px;border-bottom:0.5px solid var(--color-border-tertiary);border-right:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:13px;font-weight:500;color:#185FA5">Confluence</div>
+      <div style="padding:14px 12px;border-bottom:0.5px solid var(--color-border-tertiary)">
+        <div class="insight insight-fail"><span class="insight-label">Dated editor UX:</span> Formatting is restrictive and inconsistent — copying content loses structure</div>
+        <div class="insight insight-fail"><span class="insight-label">Search irrelevance:</span> Search results not ordered by relevance; indexing delays in large instances</div>
+        <div class="insight insight-fail"><span class="insight-label">Permission complexity:</span> Space-level and page-level permissions conflict — accidental overexposure common</div>
+      </div>
+      <div style="padding:14px 12px;border-right:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:13px;font-weight:500;color:#076558">Coda</div>
+      <div style="padding:14px 12px">
+        <div class="insight insight-fail"><span class="insight-label">Power-user curve:</span> 2-week learning period reported — the formula model assumes technical confidence</div>
+        <div class="insight insight-fail"><span class="insight-label">Large doc lag:</span> Performance degrades noticeably with documents exceeding 10+ pages or large tables</div>
+        <div class="insight insight-fail"><span class="insight-label">Team adoption friction:</span> Hard to convince non-technical teammates — no familiar mental model</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  if(id === 'heuristics') renderHeuristics();
+}
+
+function renderHeuristics() {
+  const container = document.getElementById('heur-chart');
+  if(container.children.length > 0) return;
+
+  const heuristics = [
+    { label: 'Visibility of status', scores: [4, 2, 3, 4] },
+    { label: 'Real-world match', scores: [4, 2, 2, 3] },
+    { label: 'User control & freedom', scores: [5, 3, 3, 4] },
+    { label: 'Consistency & standards', scores: [4, 2, 3, 4] },
+    { label: 'Error prevention', scores: [3, 3, 2, 3] },
+    { label: 'Recognition vs recall', scores: [4, 3, 3, 3] },
+    { label: 'Flexibility & efficiency', scores: [4, 4, 3, 5] },
+    { label: 'Aesthetic & minimal design', scores: [5, 2, 2, 4] },
+    { label: 'Help users w/ errors', scores: [3, 2, 2, 3] },
+    { label: 'Help & documentation', scores: [4, 3, 3, 4] },
+  ];
+
+  const colors = ['#888780','#7F77DD','#378ADD','#1D9E75'];
+  const textColors = ['#444441','#3C3489','#0C447C','#085041'];
+  const tools = ['Notion','ClickUp','Confluence','Coda'];
+
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:160px 1fr;gap:8px 16px;align-items:center;';
+
+  heuristics.forEach(h => {
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'font-size:12px;color:var(--color-text-secondary);';
+    lbl.textContent = h.label;
+    grid.appendChild(lbl);
+
+    const barsWrap = document.createElement('div');
+    barsWrap.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:4px;';
+
+    h.scores.forEach((score, i) => {
+      const wrap = document.createElement('div');
+      const bg = document.createElement('div');
+      bg.style.cssText = 'height:20px;border-radius:3px;background:var(--color-background-secondary);overflow:hidden;position:relative;';
+      const fill = document.createElement('div');
+      const pct = (score / 5) * 100;
+      fill.style.cssText = `height:100%;border-radius:3px;background:${colors[i]};width:${pct}%;display:flex;align-items:center;padding-left:5px;`;
+      const scoreText = document.createElement('span');
+      scoreText.style.cssText = `font-size:10px;font-weight:500;color:${textColors[i]};opacity:${pct > 25 ? 1 : 0};`;
+      scoreText.textContent = score + '/5';
+      fill.appendChild(scoreText);
+      bg.appendChild(fill);
+      const toolLbl = document.createElement('div');
+      toolLbl.style.cssText = 'font-size:10px;color:var(--color-text-secondary);text-align:center;margin-top:2px;';
+      toolLbl.textContent = tools[i];
+      wrap.appendChild(bg);
+      wrap.appendChild(toolLbl);
+      barsWrap.appendChild(wrap);
+    });
+
+    grid.appendChild(barsWrap);
+  });
+
+  container.appendChild(grid);
+}
+</script>
