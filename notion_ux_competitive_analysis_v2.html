@@ -1,0 +1,480 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:1.5rem 0;font-family:var(--font-sans)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem}
+.tab{padding:6px 14px;font-size:12px;font-weight:500;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all .15s}
+.tab.active,.tab:hover{background:var(--color-background-primary);color:var(--color-text-primary);border-color:var(--color-border-primary)}
+.panel{display:none}.panel.active{display:block}
+.sec{font-size:13px;font-weight:500;color:var(--color-text-primary);margin:0 0 10px}
+.sec+.sec{margin-top:1.2rem}
+.grid4{display:grid;grid-template-columns:160px repeat(4,minmax(0,1fr));border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.grid4 .hd{padding:10px 11px;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em}
+.grid4 .hd:not(:last-child),.grid4 .bd:not(:last-child){border-right:0.5px solid var(--color-border-tertiary)}
+.grid4 .lbl{padding:11px;font-size:11px;font-weight:500;color:var(--color-text-secondary);background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.grid4 .bd{padding:11px;font-size:12px;color:var(--color-text-primary);border-bottom:0.5px solid var(--color-border-tertiary);line-height:1.5;vertical-align:top}
+.grid4 .row-last .lbl,.grid4 .row-last .bd{border-bottom:none}
+.tag{display:inline-block;padding:2px 7px;border-radius:var(--border-radius-md);font-size:10px;font-weight:500;margin:2px 2px 2px 0;line-height:1.4}
+.tag-win{background:var(--color-background-success);color:var(--color-text-success)}
+.tag-fail{background:var(--color-background-danger);color:var(--color-text-danger)}
+.tag-warn{background:var(--color-background-warning);color:var(--color-text-warning)}
+.tag-info{background:var(--color-background-info);color:var(--color-text-info)}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500;margin:2px 2px 2px 0}
+.chip-n{background:#F1EFE8;color:#444441}
+.chip-cu{background:#EEEDFE;color:#3C3489}
+.chip-cf{background:#E6F1FB;color:#0C447C}
+.chip-co{background:#E1F5EE;color:#085041}
+.violation{padding:7px 10px;border-radius:var(--border-radius-md);margin:4px 0;font-size:11px;line-height:1.5}
+.v-fail{background:var(--color-background-danger);color:var(--color-text-danger);border-left:2px solid #E24B4A;border-radius:0}
+.v-warn{background:var(--color-background-warning);color:var(--color-text-warning);border-left:2px solid #EF9F27;border-radius:0}
+.v-win{background:var(--color-background-success);color:var(--color-text-success);border-left:2px solid #639922;border-radius:0}
+.v-title{font-weight:500;margin-bottom:2px}
+.heat-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:10px}
+.heat-hdr{display:grid;grid-template-columns:160px repeat(4,minmax(0,1fr));border-bottom:0.5px solid var(--color-border-tertiary)}
+.heat-hdr-cell{padding:9px 11px;font-size:11px;font-weight:500}
+.heat-body{display:grid;grid-template-columns:160px repeat(4,minmax(0,1fr))}
+.heat-body>div{padding:10px 11px;font-size:12px;border-top:0.5px solid var(--color-border-tertiary);line-height:1.5}
+.heat-body>div:not(:last-child){border-right:0.5px solid var(--color-border-tertiary)}
+.heat-lbl{font-size:11px;font-weight:500;color:var(--color-text-secondary);background:var(--color-background-secondary)}
+.score-bar{height:6px;border-radius:3px;background:var(--color-background-secondary);margin:4px 0 2px;overflow:hidden}
+.score-fill{height:100%;border-radius:3px}
+.score-num{font-size:10px;color:var(--color-text-secondary)}
+.ia-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.ia-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.ia-card-hdr{padding:9px 12px;font-size:12px;font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary)}
+.ia-row{display:grid;grid-template-columns:120px 1fr;border-bottom:0.5px solid var(--color-border-tertiary)}
+.ia-row:last-child{border-bottom:none}
+.ia-row>div{padding:8px 10px;font-size:11px;line-height:1.5}
+.ia-row>div:first-child{font-weight:500;color:var(--color-text-secondary);background:var(--color-background-secondary);border-right:0.5px solid var(--color-border-tertiary)}
+.cog-row{display:grid;grid-template-columns:160px repeat(4,minmax(0,1fr));border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-top:10px}
+.cog-hd{padding:9px 10px;font-size:11px;font-weight:500;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em}
+.cog-hd:not(:last-child),.cog-cell:not(:last-child){border-right:0.5px solid var(--color-border-tertiary)}
+.cog-lbl{padding:9px 10px;font-size:11px;font-weight:500;color:var(--color-text-secondary);background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.cog-cell{padding:9px 10px;font-size:11px;color:var(--color-text-primary);border-bottom:0.5px solid var(--color-border-tertiary);line-height:1.5}
+.cog-last .cog-lbl,.cog-last .cog-cell{border-bottom:none}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle}
+</style>
+
+<div class="wrap">
+<div class="tabs">
+  <div class="tab active" onclick="show('uxw')">UX writing taxonomy</div>
+  <div class="tab" onclick="show('heur')">Heuristic violations</div>
+  <div class="tab" onclick="show('heat')">HEAT model</div>
+  <div class="tab" onclick="show('ia')">Information architecture</div>
+</div>
+
+<div id="uxw" class="panel active">
+  <div class="sec">Micro-copy vs macro-copy — machine-focused vs human-focused logic</div>
+  <div class="grid4">
+    <div class="hd">Dimension</div>
+    <div class="hd"><span class="dot" style="background:#888780"></span>Notion</div>
+    <div class="hd"><span class="dot" style="background:#7F77DD"></span>ClickUp</div>
+    <div class="hd"><span class="dot" style="background:#378ADD"></span>Confluence</div>
+    <div class="hd"><span class="dot" style="background:#1D9E75"></span>Coda</div>
+
+    <div class="lbl">Orientation</div>
+    <div class="bd"><span class="tag tag-win">Human-first</span> Calm, creative encouragement. Avoids system language.</div>
+    <div class="bd"><span class="tag tag-warn">Hybrid</span> Productivity-framed. Starts human, turns machine-like deep in features.</div>
+    <div class="bd"><span class="tag tag-fail">Machine-first</span> Documentation register. Speaks to admins, not end users.</div>
+    <div class="bd"><span class="tag tag-warn">Builder-first</span> Treats user as developer. Human in tone, technical in structure.</div>
+
+    <div class="lbl">Button labels (micro)</div>
+    <div class="bd"><span class="tag tag-win">Human</span> "New page", "Add a comment" — conversational, low friction</div>
+    <div class="bd"><span class="tag tag-warn">Mixed</span> "Create Task" (clear) vs "ClickApp" (jargon). Inconsistent register.</div>
+    <div class="bd"><span class="tag tag-fail">Machine</span> "Insert macro", "Apply template", "Edit restrictions" — system-speak</div>
+    <div class="bd"><span class="tag tag-warn">Mixed</span> "New doc" (clear) vs "Add a Pack" (requires prior knowledge)</div>
+
+    <div class="lbl">Tooltips (micro)</div>
+    <div class="bd"><span class="tag tag-win">Human</span> Short, benefit-led — "Turn any block into a database row"</div>
+    <div class="bd"><span class="tag tag-fail">Machine</span> Often absent. When present: feature-name repeat, not explanation.</div>
+    <div class="bd"><span class="tag tag-fail">Machine</span> Macro tooltips describe syntax, not purpose. Assumes prior experience.</div>
+    <div class="bd"><span class="tag tag-warn">Hybrid</span> Formula tooltips show arguments but not real-world use cases.</div>
+
+    <div class="lbl">Onboarding copy (macro)</div>
+    <div class="bd"><span class="tag tag-win">Human</span> "What will you use Notion for?" — intent-first, warm</div>
+    <div class="bd"><span class="tag tag-warn">Mixed</span> Checklist is task-driven ("Create your first task") — directive but motivating</div>
+    <div class="bd"><span class="tag tag-fail">Machine</span> No in-product onboarding copy. Assumes admin-led setup.</div>
+    <div class="bd"><span class="tag tag-win">Human</span> Survey-driven — "What kind of team are you?" — adapts from input</div>
+
+    <div class="lbl">Help docs (macro)</div>
+    <div class="bd"><span class="tag tag-win">Human</span> Conversational, use-case framed. "How to build a project tracker."</div>
+    <div class="bd"><span class="tag tag-warn">Mixed</span> Task-framed help. Step-by-step but dense with feature names.</div>
+    <div class="bd"><span class="tag tag-fail">Machine</span> Reference-style. Parameters, API fields, admin flags. Minimal narrative.</div>
+    <div class="bd"><span class="tag tag-warn">Mixed</span> Community-written docs vary. Official docs lean technical.</div>
+
+    <div class="lbl">Empty state copy (micro)</div>
+    <div class="bd"><span class="tag tag-win">Human</span> "A fresh page for your ideas" — invites creation without pressure</div>
+    <div class="bd"><span class="tag tag-warn">Mixed</span> "No tasks yet — add one!" — directive and functional</div>
+    <div class="bd"><span class="tag tag-fail">Machine</span> "No pages exist in this space" — system confirmation, not invitation</div>
+    <div class="bd"><span class="tag tag-win">Human</span> "Build something here" — builder metaphor, empowering</div>
+
+    <div class="lbl">Error messages (micro)</div>
+    <div class="bd"><span class="tag tag-warn">Mixed</span> Friendly tone but vague cause — "Something went wrong" without recovery path</div>
+    <div class="bd"><span class="tag tag-fail">Machine</span> Generic system errors. Automation failures often silent.</div>
+    <div class="bd"><span class="tag tag-fail">Machine</span> Atlassian stack traces shown to end users. Verbose and technical.</div>
+    <div class="bd"><span class="tag tag-warn">Mixed</span> Formula errors are precise for devs, opaque for non-technical users.</div>
+
+    <div class="lbl row-last">Verdict</div>
+    <div class="bd row-last">Most consistently human. Copy designed around user intent, not system state.</div>
+    <div class="bd row-last">Starts human but fractures under complexity. Machine logic leaks into deep features.</div>
+    <div class="bd row-last">Strongest machine orientation of the four. Built for IT admins, not end users.</div>
+    <div class="bd row-last">Human in spirit, technical in delivery. Best for power users; alienates generalists.</div>
+  </div>
+</div>
+
+<div id="heur" class="panel">
+  <div class="sec">Nielsen's 10 heuristics — specific violations + wins per product</div>
+
+  <div class="grid4" style="margin-bottom:12px">
+    <div class="hd">Heuristic</div>
+    <div class="hd"><span class="dot" style="background:#888780"></span>Notion</div>
+    <div class="hd"><span class="dot" style="background:#7F77DD"></span>ClickUp</div>
+    <div class="hd"><span class="dot" style="background:#378ADD"></span>Confluence</div>
+    <div class="hd"><span class="dot" style="background:#1D9E75"></span>Coda</div>
+
+    <div class="lbl">H1 · Visibility of system status</div>
+    <div class="bd">
+      <div class="violation v-win"><div class="v-title">Win</div>Autosave dot indicator always visible in top bar — users know their work is safe without prompting.</div>
+      <div class="violation v-fail"><div class="v-title">Violation</div>Automation triggers execute with no progress indicator. Users click twice thinking it failed.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-fail"><div class="v-title">Violation</div>Automations queue silently — delays of 3–7 min with zero status feedback.</div>
+      <div class="violation v-fail"><div class="v-title">Violation</div>Bulk task operations show no progress bar — unclear if action applied to all items.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-warn"><div class="v-title">Partial</div>Version history visible but notification system overwhelms — users miss critical updates.</div>
+      <div class="violation v-fail"><div class="v-title">Violation</div>Page indexing delays after editing — search returns stale results with no "indexing" indicator.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-win"><div class="v-title">Win</div>Live collaboration cursors visible — awareness of co-editors exceeds Notion and ClickUp.</div>
+      <div class="violation v-warn"><div class="v-title">Partial</div>Pack sync status buried in settings — users unsure if live data is current.</div>
+    </div>
+
+    <div class="lbl">H2 · Match system & real world</div>
+    <div class="bd">
+      <div class="violation v-win"><div class="v-title">Win</div>Block metaphor maps to real writing — dragging blocks feels like moving paragraphs.</div>
+      <div class="violation v-warn"><div class="v-title">Partial</div>"Relation" and "Rollup" database properties unfamiliar to non-technical users.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-fail"><div class="v-title">Violation</div>"ClickApps", "Spaces", "Lists" — 5-tier hierarchy has no equivalent in prior mental models.</div>
+      <div class="violation v-fail"><div class="v-title">Violation</div>Dashboard widget names (e.g. "Workload", "Box") do not match what they show.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-fail"><div class="v-title">Violation</div>"Macros", "Blueprints", "Space Permissions" — language from software dev, not knowledge workers.</div>
+      <div class="violation v-fail"><div class="v-title">Violation</div>Formatting toolbar uses icons with no labels — relies entirely on prior tool familiarity.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-fail"><div class="v-title">Violation</div>"Packs" and "Canvas" undefined at first encounter. No contextual primer offered.</div>
+      <div class="violation v-win"><div class="v-title">Win</div>Table/row/column model maps to spreadsheet familiarity — reduces ramp-up for ops teams.</div>
+    </div>
+
+    <div class="lbl">H3 · User control & freedom</div>
+    <div class="bd">
+      <div class="violation v-win"><div class="v-title">Win</div>Unlimited undo history. Drag-to-reorder blocks. Delete recoverable from trash for 30 days.</div>
+      <div class="violation v-warn"><div class="v-title">Partial</div>No "undo" for database property deletions — data loss is silent and immediate.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-fail"><div class="v-title">Violation</div>Customizing views requires navigating 4+ layers. No quick "reset to default" on dashboards.</div>
+      <div class="violation v-warn"><div class="v-title">Partial</div>Deleting a Space gives one confirmation modal — no staging or grace period for recovery.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-fail"><div class="v-title">Violation</div>Permission changes take effect immediately with no preview. Accidental lockouts happen.</div>
+      <div class="violation v-fail"><div class="v-title">Violation</div>No universal undo for page moves — pages lost in large space trees with no breadcrumb back.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-win"><div class="v-title">Win</div>Highly customisable — almost any cell, table, or button can be changed without coding.</div>
+      <div class="violation v-warn"><div class="v-title">Partial</div>Deleting a table column with formula dependencies fails silently — formulas break invisibly.</div>
+    </div>
+
+    <div class="lbl">H4 · Consistency & standards</div>
+    <div class="bd">
+      <div class="violation v-win"><div class="v-title">Win</div>Slash command "/" is universal — works on every page, every block type. One interaction model.</div>
+      <div class="violation v-warn"><div class="v-title">Partial</div>Sidebar icons vs inline block menus use different interaction patterns for the same actions.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-fail"><div class="v-title">Violation</div>Right-click menus differ between List view, Board view, and Calendar view — same actions, different labels.</div>
+      <div class="violation v-fail"><div class="v-title">Violation</div>Docs editor has different toolbar from task description editor — same product, different UI.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-fail"><div class="v-title">Violation</div>New editor (Fabric) vs legacy pages render differently — users can't tell which mode they're in.</div>
+      <div class="violation v-fail"><div class="v-title">Violation</div>Space-level vs page-level settings use different navigation patterns and terminology.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-win"><div class="v-title">Win</div>Formula syntax consistent across all table types — one language model for the whole platform.</div>
+      <div class="violation v-warn"><div class="v-title">Partial</div>Button styling in one doc cannot be reused in another — no global design token system.</div>
+    </div>
+
+    <div class="lbl">H8 · Aesthetic & minimal design</div>
+    <div class="bd">
+      <div class="violation v-win"><div class="v-title">Win</div>Best-in-class minimal UI. Toolbar hidden until needed. White space used deliberately.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-fail"><div class="v-title">Violation</div>Default workspace shows sidebar, toolbar, task list, status filters, and sprint widgets simultaneously — cognitive overload on first open.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-fail"><div class="v-title">Violation</div>Macro insertion overlays, template pickers, and comment threads stack visually — page becomes unreadable in collaborative docs.</div>
+    </div>
+    <div class="bd">
+      <div class="violation v-win"><div class="v-title">Win</div>Clean doc canvas. Interactive controls placed inline without cluttering surrounding content.</div>
+    </div>
+
+    <div class="lbl row-last">H10 · Help & documentation</div>
+    <div class="bd row-last">
+      <div class="violation v-win"><div class="v-title">Win</div>Template gallery embedded in product. Community-authored docs cover 95% of use cases.</div>
+    </div>
+    <div class="bd row-last">
+      <div class="violation v-warn"><div class="v-title">Partial</div>Help center exists but requires leaving the product. In-product tooltips absent on complex features.</div>
+    </div>
+    <div class="bd row-last">
+      <div class="violation v-fail"><div class="v-title">Violation</div>Atlassian documentation is comprehensive but structured for admins — end users cannot self-serve effectively.</div>
+    </div>
+    <div class="bd row-last">
+      <div class="violation v-warn"><div class="v-title">Partial</div>YouTube channel strong. In-product contextual help weak — users must leave the doc to understand formulas.</div>
+    </div>
+  </div>
+</div>
+
+<div id="heat" class="panel">
+  <div class="sec">HEAT model — Honesty · Empathy · Authenticity · Trust across onboarding</div>
+
+  <div class="heat-card">
+    <div class="heat-hdr">
+      <div class="heat-hdr-cell" style="background:var(--color-background-secondary);color:var(--color-text-secondary);border-right:0.5px solid var(--color-border-tertiary)">HEAT dimension</div>
+      <div class="heat-hdr-cell" style="background:#F1EFE8;color:#444441;border-right:0.5px solid var(--color-border-tertiary)">Notion</div>
+      <div class="heat-hdr-cell" style="background:#EEEDFE;color:#3C3489;border-right:0.5px solid var(--color-border-tertiary)">ClickUp</div>
+      <div class="heat-hdr-cell" style="background:#E6F1FB;color:#0C447C;border-right:0.5px solid var(--color-border-tertiary)">Confluence</div>
+      <div class="heat-hdr-cell" style="background:#E1F5EE;color:#085041">Coda</div>
+    </div>
+
+    <div class="heat-body">
+      <div class="heat-lbl">H · Honesty<br><span style="font-size:10px;font-weight:400">Does it set accurate expectations?</span></div>
+      <div>
+        <div class="score-bar"><div class="score-fill" style="width:72%;background:#888780"></div></div>
+        <div class="score-num">72 / 100</div>
+        <div class="violation v-warn" style="margin-top:6px"><div class="v-title">Partial</div>Template gallery sets high expectations — real use requires significant setup that isn't flagged upfront.</div>
+        <div class="violation v-win" style="margin-top:4px"><div class="v-title">Win</div>Free plan limitations clearly communicated before hitting them.</div>
+      </div>
+      <div>
+        <div class="score-bar"><div class="score-fill" style="width:44%;background:#7F77DD"></div></div>
+        <div class="score-num">44 / 100</div>
+        <div class="violation v-fail" style="margin-top:6px"><div class="v-title">Violation</div>"Do everything in one place" marketing vs reality of needing 6+ integrations to match workflow. Gap causes trust erosion.</div>
+        <div class="violation v-warn" style="margin-top:4px"><div class="v-title">Issue</div>Automation capabilities oversold — silent failures discovered only post-setup.</div>
+      </div>
+      <div>
+        <div class="score-bar"><div class="score-fill" style="width:55%;background:#378ADD"></div></div>
+        <div class="score-num">55 / 100</div>
+        <div class="violation v-warn" style="margin-top:6px"><div class="v-title">Partial</div>Enterprise pricing complex — users discover cost tiers only after building on the platform.</div>
+        <div class="violation v-win" style="margin-top:4px"><div class="v-title">Win</div>Atlassian ecosystem honestly communicates Jira dependency — no bait-and-switch.</div>
+      </div>
+      <div>
+        <div class="score-bar"><div class="score-fill" style="width:60%;background:#1D9E75"></div></div>
+        <div class="score-num">60 / 100</div>
+        <div class="violation v-fail" style="margin-top:6px"><div class="v-title">Violation</div>Power shown immediately — learning cost hidden. "2-week learning curve" not communicated at signup.</div>
+        <div class="violation v-win" style="margin-top:4px"><div class="v-title">Win</div>Formula system is genuinely as powerful as marketed.</div>
+      </div>
+    </div>
+
+    <div class="heat-body">
+      <div class="heat-lbl">E · Empathy<br><span style="font-size:10px;font-weight:400">Does it understand user anxiety?</span></div>
+      <div>
+        <div class="score-bar"><div class="score-fill" style="width:78%;background:#888780"></div></div>
+        <div class="score-num">78 / 100</div>
+        <div class="violation v-win" style="margin-top:6px"><div class="v-title">Win</div>"What will you use Notion for?" survey reduces blank-page anxiety by anchoring purpose.</div>
+        <div class="violation v-fail" style="margin-top:4px"><div class="v-title">Frustration point</div>Once survey complete, user dropped on blank canvas with no next step — empathy ends abruptly.</div>
+      </div>
+      <div>
+        <div class="score-bar"><div class="score-fill" style="width:55%;background:#7F77DD"></div></div>
+        <div class="score-num">55 / 100</div>
+        <div class="violation v-win" style="margin-top:6px"><div class="v-title">Win</div>Onboarding checklist reduces "what do I do first?" anxiety with structured progress.</div>
+        <div class="violation v-fail" style="margin-top:4px"><div class="v-title">Frustration point</div>Density of default workspace overwhelms new users — empathy collapses under feature overload.</div>
+      </div>
+      <div>
+        <div class="score-bar"><div class="score-fill" style="width:28%;background:#378ADD"></div></div>
+        <div class="score-num">28 / 100</div>
+        <div class="violation v-fail" style="margin-top:6px"><div class="v-title">Frustration point</div>No empathy layer for end users — experience designed for admins. Regular users dropped into complex environments cold.</div>
+        <div class="violation v-fail" style="margin-top:4px"><div class="v-title">Frustration point</div>Permission errors presented as stack traces — tech anxiety amplified, not resolved.</div>
+      </div>
+      <div>
+        <div class="score-bar"><div class="score-fill" style="width:50%;background:#1D9E75"></div></div>
+        <div class="score-num">50 / 100</div>
+        <div class="violation v-win" style="margin-top:6px"><div class="v-title">Win</div>Survey-adaptive task list personalises experience — strongest empathetic signal of the four.</div>
+        <div class="violation v-fail" style="margin-top:4px"><div class="v-title">Frustration point</div>Formula-first architecture punishes non-technical users — no low-complexity path preserved after setup.</div>
+      </div>
+    </div>
+
+    <div class="heat-body">
+      <div class="heat-lbl">A · Authenticity<br><span style="font-size:10px;font-weight:400">Does the product feel genuine?</span></div>
+      <div>
+        <div class="score-bar"><div class="score-fill" style="width:82%;background:#888780"></div></div>
+        <div class="score-num">82 / 100</div>
+        <div class="violation v-win" style="margin-top:6px"><div class="v-title">Win</div>Design language consistent end-to-end — minimal aesthetic feels like a genuine philosophy, not marketing.</div>
+        <div class="violation v-warn" style="margin-top:4px"><div class="v-title">Slip</div>AI features (Notion AI) inserted mid-workflow without prior context — feels bolted-on.</div>
+      </div>
+      <div>
+        <div class="score-bar"><div class="score-fill" style="width:38%;background:#7F77DD"></div></div>
+        <div class="score-num">38 / 100</div>
+        <div class="violation v-fail" style="margin-top:6px"><div class="v-title">Authenticity failure</div>"One platform for everything" brand vs reality of needing 15+ ClickApps to replicate basic workflows. Users feel misled.</div>
+        <div class="violation v-warn" style="margin-top:4px"><div class="v-title">Slip</div>UI redesigns have shipped without migration paths — users return to changed workflows without warning.</div>
+      </div>
+      <div>
+        <div class="score-bar"><div class="score-fill" style="width:65%;background:#378ADD"></div></div>
+        <div class="score-num">65 / 100</div>
+        <div class="violation v-win" style="margin-top:6px"><div class="v-title">Win</div>Enterprise-grade positioning is authentic — security, permissions, and audit logs are genuinely best-in-class.</div>
+        <div class="violation v-fail" style="margin-top:4px"><div class="v-title">Authenticity failure</div>UI redesign (Confluence Cloud vs Server) left legacy users stranded — old muscle memory invalidated.</div>
+      </div>
+      <div>
+        <div class="score-bar"><div class="score-fill" style="width:72%;background:#1D9E75"></div></div>
+        <div class="score-num">72 / 100</div>
+        <div class="violation v-win" style="margin-top:6px"><div class="v-title">Win</div>Doc Gallery built by real teams — community authenticity stronger than competitor template galleries.</div>
+        <div class="violation v-warn" style="margin-top:4px"><div class="v-title">Slip</div>"Build anything" positioning can feel hollow when users hit performance limits on large docs.</div>
+      </div>
+    </div>
+
+    <div class="heat-body" style="border-bottom:none">
+      <div class="heat-lbl" style="border-bottom:none">T · Trust<br><span style="font-size:10px;font-weight:400">Where does trust break down?</span></div>
+      <div style="border-bottom:none">
+        <div class="score-bar"><div class="score-fill" style="width:80%;background:#888780"></div></div>
+        <div class="score-num">80 / 100</div>
+        <div class="violation v-fail" style="margin-top:6px"><div class="v-title">Trust break point</div>Large database slowdowns (~10k+ rows) contradict the "everything in one place" promise. Users migrate data out.</div>
+        <div class="violation v-win" style="margin-top:4px"><div class="v-title">Trust anchor</div>Reliable autosave and version history. Users trust their work won't be lost.</div>
+      </div>
+      <div style="border-bottom:none">
+        <div class="score-bar"><div class="score-fill" style="width:35%;background:#7F77DD"></div></div>
+        <div class="score-num">35 / 100</div>
+        <div class="violation v-fail" style="margin-top:6px"><div class="v-title">Trust break point</div>Silent automation failures — users discover tasks were never assigned or notified. Trust in the system collapses after first incident.</div>
+        <div class="violation v-fail" style="margin-top:4px"><div class="v-title">Trust break point</div>Mobile app instability — actions completed on mobile not reflected on web, causing data confusion.</div>
+      </div>
+      <div style="border-bottom:none">
+        <div class="score-bar"><div class="score-fill" style="width:58%;background:#378ADD"></div></div>
+        <div class="score-num">58 / 100</div>
+        <div class="violation v-win" style="margin-top:6px"><div class="v-title">Trust anchor</div>Atlassian's enterprise track record. Uptime SLAs, audit logs, and SOC2 compliance build institutional trust.</div>
+        <div class="violation v-fail" style="margin-top:4px"><div class="v-title">Trust break point</div>Search failures — users cannot find content they know exists. Fundamentally breaks the knowledge management promise.</div>
+      </div>
+      <div style="border-bottom:none">
+        <div class="score-bar"><div class="score-fill" style="width:65%;background:#1D9E75"></div></div>
+        <div class="score-num">65 / 100</div>
+        <div class="violation v-warn" style="margin-top:6px"><div class="v-title">Trust break point</div>Performance degradation on large docs creates doubt — users unsure if the platform can scale with their needs.</div>
+        <div class="violation v-win" style="margin-top:4px"><div class="v-title">Trust anchor</div>Formula engine is reliable and predictable — power users trust it completely once mastered.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec" style="margin-top:1rem">HEAT composite scores — where the learning curve becomes frustration</div>
+  <div style="position:relative;width:100%;height:220px"><canvas id="heatChart"></canvas></div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--color-text-secondary)">
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#888780;display:inline-block"></span>Notion</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#7F77DD;display:inline-block"></span>ClickUp</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#378ADD;display:inline-block"></span>Confluence</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#1D9E75;display:inline-block"></span>Coda</span>
+  </div>
+</div>
+
+<div id="ia" class="panel">
+  <div class="sec">Page tree hierarchy vs block-based flexibility — cognitive load impact</div>
+  <div class="ia-grid">
+    <div class="ia-card">
+      <div class="ia-card-hdr" style="background:#F1EFE8;color:#444441;border-color:var(--color-border-tertiary)">Notion — block-based flexibility</div>
+      <div class="ia-row"><div>Model</div><div>Everything is a block — text, images, databases, embeds. Pages contain blocks, blocks contain other blocks.</div></div>
+      <div class="ia-row"><div>Navigation</div><div>Freeform sidebar tree. No enforced structure. Users organise as they see fit — unlimited nesting depth.</div></div>
+      <div class="ia-row"><div>Cognitive load</div><div><span class="tag tag-warn">Medium at start</span><span class="tag tag-win">Low after 1 week</span> Blank canvas is disorienting initially. Once mental model clicks, navigation is frictionless.</div></div>
+      <div class="ia-row"><div>Flexibility cost</div><div>High creative freedom = high disorganisation risk. Teams without shared conventions end up with chaotic sidebar trees.</div></div>
+      <div class="ia-row"><div>UX win</div><div class="violation v-win" style="margin:0"><div class="v-title">Win</div>Drag-and-drop block reordering reduces restructuring friction to near zero — lowest IA edit cost of the four.</div></div>
+      <div class="ia-row"><div>UX issue</div><div class="violation v-fail" style="margin:0"><div class="v-title">Issue</div>No enforced IA means shared workspaces degrade over time. No guardrails for team consistency.</div></div>
+    </div>
+    <div class="ia-card">
+      <div class="ia-card-hdr" style="background:#EEEDFE;color:#3C3489;border-color:#C4B1F0">ClickUp — enforced 5-level hierarchy</div>
+      <div class="ia-row"><div>Model</div><div>Workspace → Space → Folder → List → Task. Every item has a fixed position in the hierarchy. Cannot be bypassed.</div></div>
+      <div class="ia-row"><div>Navigation</div><div>Rigid tree. Views (list, board, Gantt) are overlays on the same hierarchy — not alternative structures.</div></div>
+      <div class="ia-row"><div>Cognitive load</div><div><span class="tag tag-fail">High at start</span><span class="tag tag-warn">Medium ongoing</span> 5 levels must be understood before any work can begin — steep initial cognitive demand.</div></div>
+      <div class="ia-row"><div>Flexibility cost</div><div>Predictable IA for large teams but bureaucratic for small ones. Simple projects require creating unnecessary hierarchy nodes.</div></div>
+      <div class="ia-row"><div>UX win</div><div class="violation v-win" style="margin:0"><div class="v-title">Win</div>Multiple views (list, board, calendar, Gantt) on the same data set is genuinely powerful — same IA, different lenses.</div></div>
+      <div class="ia-row"><div>UX issue</div><div class="violation v-fail" style="margin:0"><div class="v-title">Issue</div>Hierarchy labels ("Spaces", "Folders", "Lists") don't match how teams actually think about their work — vocabulary mismatch increases cognitive load.</div></div>
+    </div>
+    <div class="ia-card">
+      <div class="ia-card-hdr" style="background:#E6F1FB;color:#0C447C;border-color:#A8C8F0">Confluence — page tree hierarchy</div>
+      <div class="ia-row"><div>Model</div><div>Site → Space → Page → Child page. Content lives in a strict tree. No block model — pages are document units.</div></div>
+      <div class="ia-row"><div>Navigation</div><div>Left sidebar page tree. Tree can grow to hundreds of nodes — no auto-archiving or visibility capping.</div></div>
+      <div class="ia-row"><div>Cognitive load</div><div><span class="tag tag-fail">High and sustained</span> Tree nav becomes unmanageable at scale. Finding content requires either good memory or functional search — search is unreliable.</div></div>
+      <div class="ia-row"><div>Flexibility cost</div><div>Lowest flexibility of the four. Page-centric model struggles with dynamic or relational data — workarounds required.</div></div>
+      <div class="ia-row"><div>UX win</div><div class="violation v-win" style="margin:0"><div class="v-title">Win</div>Page hierarchy is instantly legible to new users — tree nav requires no onboarding, just exploration.</div></div>
+      <div class="ia-row"><div>UX issue</div><div class="violation v-fail" style="margin:0"><div class="v-title">Issue</div>No equivalent to Notion's inline database — data and docs are structurally separated, requiring context-switching between Confluence and Jira.</div></div>
+    </div>
+    <div class="ia-card">
+      <div class="ia-card-hdr" style="background:#E1F5EE;color:#085041;border-color:#9FE1CB">Coda — doc-as-app with table-first IA</div>
+      <div class="ia-row"><div>Model</div><div>Workspace → Doc → Page → Section. Tables are first-class IA elements — can reference and filter across the entire doc.</div></div>
+      <div class="ia-row"><div>Navigation</div><div>Left sidebar by doc, then page within. Flat and clean at doc level but no cross-doc navigation.</div></div>
+      <div class="ia-row"><div>Cognitive load</div><div><span class="tag tag-fail">Highest initial</span><span class="tag tag-win">Low for power users</span> Requires inversion of expectations — a "doc" behaves more like an app than a document.</div></div>
+      <div class="ia-row"><div>Flexibility cost</div><div>Highest flexibility of the four for structured data. Tables with cross-references rival relational databases. Text editing is secondary.</div></div>
+      <div class="ia-row"><div>UX win</div><div class="violation v-win" style="margin:0"><div class="v-title">Win</div>Cross-table references within a doc eliminate data duplication — strongest relational IA of the four products.</div></div>
+      <div class="ia-row"><div>UX issue</div><div class="violation v-fail" style="margin:0"><div class="v-title">Issue</div>No cross-doc navigation or linking at the IA level — teams with multiple docs must manually maintain context between them.</div></div>
+    </div>
+  </div>
+
+  <div class="sec">Cognitive load comparison across key IA tasks</div>
+  <div class="cog-row">
+    <div class="cog-hd">IA task</div>
+    <div class="cog-hd"><span class="dot" style="background:#888780"></span>Notion</div>
+    <div class="cog-hd"><span class="dot" style="background:#7F77DD"></span>ClickUp</div>
+    <div class="cog-hd"><span class="dot" style="background:#378ADD"></span>Confluence</div>
+    <div class="cog-hd"><span class="dot" style="background:#1D9E75"></span>Coda</div>
+    <div class="cog-lbl">Finding existing content</div>
+    <div class="cog-cell"><span class="tag tag-win">Low</span> Search + sidebar tree. Predictable.</div>
+    <div class="cog-cell"><span class="tag tag-warn">Medium</span> Must know which Space content lives in.</div>
+    <div class="cog-cell"><span class="tag tag-fail">High</span> Search unreliable. Tree grows unmanageable.</div>
+    <div class="cog-cell"><span class="tag tag-warn">Medium</span> Fast within a doc, slow across docs.</div>
+    <div class="cog-lbl">Creating new content</div>
+    <div class="cog-cell"><span class="tag tag-win">Low</span> "/" anywhere. No pre-structure required.</div>
+    <div class="cog-cell"><span class="tag tag-warn">Medium</span> Must choose Space + List before creating.</div>
+    <div class="cog-cell"><span class="tag tag-win">Low</span> New page in any space is frictionless.</div>
+    <div class="cog-cell"><span class="tag tag-warn">Medium</span> Easy for text, complex for tables/formulas.</div>
+    <div class="cog-lbl">Restructuring content</div>
+    <div class="cog-cell"><span class="tag tag-win">Low</span> Drag-and-drop blocks or pages.</div>
+    <div class="cog-cell"><span class="tag tag-fail">High</span> Moving tasks across Spaces disrupts automations and views.</div>
+    <div class="cog-cell"><span class="tag tag-warn">Medium</span> Page moves possible but break incoming links.</div>
+    <div class="cog-cell"><span class="tag tag-warn">Medium</span> Table columns easy, cross-doc restructure hard.</div>
+    <div class="cog-lbl">Onboarding a new team member</div>
+    <div class="cog-cell"><span class="tag tag-warn">Medium</span> Freedom requires team conventions to exist first.</div>
+    <div class="cog-cell"><span class="tag tag-fail">High</span> 5-level hierarchy must be explained before anything makes sense.</div>
+    <div class="cog-cell"><span class="tag tag-fail">High</span> Admin must configure space access and permissions first.</div>
+    <div class="cog-cell"><span class="tag tag-fail">High</span> Doc-as-app concept requires conceptual reframe before use.</div>
+    <div class="cog-lbl cog-last">Scaling to 100+ pages</div>
+    <div class="cog-cell cog-last"><span class="tag tag-warn">Medium</span> Sidebar degrades without team discipline. No auto-org.</div>
+    <div class="cog-cell cog-last"><span class="tag tag-warn">Medium</span> Hierarchy helps at scale but becomes bureaucratic.</div>
+    <div class="cog-cell cog-last"><span class="tag tag-fail">High</span> Tree nav collapses — becomes a scroll problem, not a structure problem.</div>
+    <div class="cog-cell cog-last"><span class="tag tag-warn">Medium</span> Docs stay clean; cross-doc navigation problem grows.</div>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+function show(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='heat') renderHeat();
+}
+let heatRendered=false;
+function renderHeat(){
+  if(heatRendered) return;
+  heatRendered=true;
+  new Chart(document.getElementById('heatChart'),{
+    type:'radar',
+    data:{
+      labels:['Honesty','Empathy','Authenticity','Trust'],
+      datasets:[
+        {label:'Notion',data:[72,78,82,80],borderColor:'#888780',backgroundColor:'rgba(136,135,128,0.08)',pointBackgroundColor:'#888780',borderWidth:1.5,pointRadius:3},
+        {label:'ClickUp',data:[44,55,38,35],borderColor:'#7F77DD',backgroundColor:'rgba(127,119,221,0.08)',pointBackgroundColor:'#7F77DD',borderWidth:1.5,pointRadius:3},
+        {label:'Confluence',data:[55,28,65,58],borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,0.08)',pointBackgroundColor:'#378ADD',borderWidth:1.5,pointRadius:3},
+        {label:'Coda',data:[60,50,72,65],borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',pointBackgroundColor:'#1D9E75',borderWidth:1.5,pointRadius:3},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{r:{min:0,max:100,ticks:{stepSize:25,font:{size:10},color:'#888780',backdropColor:'transparent'},grid:{color:'rgba(128,128,128,0.15)'},pointLabels:{font:{size:12},color:'#888780'},angleLines:{color:'rgba(128,128,128,0.15)'}}}
+    }
+  });
+}
+</script>
